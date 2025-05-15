@@ -13,6 +13,63 @@ use Illuminate\Support\Facades\Log;
 class EventController extends Controller
 {
     /**
+     * Get events for a specific calendar and date range.
+     */
+    public function index(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'calendar_id' => 'required|exists:calendars,id',
+                'start' => 'required|date',
+                'end' => 'required|date|after:start',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+
+            // Check if user has access to the calendar
+            $calendar = Calendar::findOrFail($request->calendar_id);
+            if ($calendar->user_id !== $request->user()->id) {
+                return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            $events = Event::where('calendar_id', $request->calendar_id)
+                ->whereBetween('start_time', [$request->start, $request->end])
+                ->get()
+                ->map(function ($event) {
+                    return [
+                        'id' => $event->id,
+                        'title' => $event->title,
+                        'start_date' => $event->start_time,
+                        'end_date' => $event->end_time,
+                        'all_day' => $event->is_all_day,
+                        'description' => $event->description,
+                        'location' => $event->location,
+                        'color' => $event->color ?? $event->calendar->color
+                    ];
+                });
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $events
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Failed to fetch events:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch events',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Store a newly created event in storage.
      */
     public function store(Request $request)
@@ -21,13 +78,12 @@ class EventController extends Controller
             $validator = Validator::make($request->all(), [
                 'calendar_id' => 'required|exists:calendars,id',
                 'title' => 'required|string|max:255',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'all_day' => 'boolean',
                 'description' => 'nullable|string',
-                'start_time' => 'required|date',
-                'end_time' => 'required|date|after:start_time',
                 'location' => 'nullable|string|max:255',
-                'is_all_day' => 'boolean',
-                'recurrence_rule' => 'nullable|string',
-                'reminder_minutes' => 'nullable|integer|min:0',
+                'color' => 'nullable|string|max:7'
             ]);
 
             if ($validator->fails()) {
@@ -44,15 +100,26 @@ class EventController extends Controller
                 'calendar_id' => $request->calendar_id,
                 'title' => $request->title,
                 'description' => $request->description,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
+                'start_time' => $request->start_date,
+                'end_time' => $request->end_date,
                 'location' => $request->location,
-                'is_all_day' => $request->is_all_day ?? false,
-                'recurrence_rule' => $request->recurrence_rule,
-                'reminder_minutes' => $request->reminder_minutes,
+                'is_all_day' => $request->all_day ?? false,
+                'color' => $request->color
             ]);
 
-            return response()->json($event, 201);
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'start_date' => $event->start_time,
+                    'end_date' => $event->end_time,
+                    'all_day' => $event->is_all_day,
+                    'description' => $event->description,
+                    'location' => $event->location,
+                    'color' => $event->color
+                ]
+            ], 201);
 
         } catch (Exception $e) {
             Log::error('Event creation failed:', [
@@ -61,9 +128,9 @@ class EventController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Failed to create event',
-                'error' => $e->getMessage(),
-                'debug_info' => config('app.debug') ? $e->getTraceAsString() : null
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -81,13 +148,12 @@ class EventController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'title' => 'sometimes|required|string|max:255',
+                'start_date' => 'sometimes|required|date',
+                'end_date' => 'sometimes|required|date|after_or_equal:start_date',
+                'all_day' => 'boolean',
                 'description' => 'nullable|string',
-                'start_time' => 'sometimes|required|date',
-                'end_time' => 'sometimes|required|date|after:start_time',
                 'location' => 'nullable|string|max:255',
-                'is_all_day' => 'boolean',
-                'recurrence_rule' => 'nullable|string',
-                'reminder_minutes' => 'nullable|integer|min:0',
+                'color' => 'nullable|string|max:7'
             ]);
 
             if ($validator->fails()) {
@@ -97,15 +163,26 @@ class EventController extends Controller
             $event->update([
                 'title' => $request->title ?? $event->title,
                 'description' => $request->description ?? $event->description,
-                'start_time' => $request->start_time ?? $event->start_time,
-                'end_time' => $request->end_time ?? $event->end_time,
+                'start_time' => $request->start_date ?? $event->start_time,
+                'end_time' => $request->end_date ?? $event->end_time,
                 'location' => $request->location ?? $event->location,
-                'is_all_day' => $request->is_all_day ?? $event->is_all_day,
-                'recurrence_rule' => $request->recurrence_rule ?? $event->recurrence_rule,
-                'reminder_minutes' => $request->reminder_minutes ?? $event->reminder_minutes,
+                'is_all_day' => $request->all_day ?? $event->is_all_day,
+                'color' => $request->color ?? $event->color
             ]);
 
-            return response()->json($event);
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'start_date' => $event->start_time,
+                    'end_date' => $event->end_time,
+                    'all_day' => $event->is_all_day,
+                    'description' => $event->description,
+                    'location' => $event->location,
+                    'color' => $event->color
+                ]
+            ]);
 
         } catch (Exception $e) {
             Log::error('Event update failed:', [
@@ -114,9 +191,9 @@ class EventController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Failed to update event',
-                'error' => $e->getMessage(),
-                'debug_info' => config('app.debug') ? $e->getTraceAsString() : null
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -134,7 +211,10 @@ class EventController extends Controller
 
             $event->delete();
 
-            return response()->json(['message' => 'Event deleted successfully']);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Event deleted successfully'
+            ]);
 
         } catch (Exception $e) {
             Log::error('Event deletion failed:', [
@@ -143,9 +223,9 @@ class EventController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Failed to delete event',
-                'error' => $e->getMessage(),
-                'debug_info' => config('app.debug') ? $e->getTraceAsString() : null
+                'error' => $e->getMessage()
             ], 500);
         }
     }

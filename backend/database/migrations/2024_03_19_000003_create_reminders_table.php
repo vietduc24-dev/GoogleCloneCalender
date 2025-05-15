@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained()->onDelete('cascade');
-            $table->integer('minutes_before');
-            $table->enum('type', ['email', 'notification'])->default('notification');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('title');
+            $table->dateTime('reminder_time');
+            $table->string('method')->default('notification');
+            $table->string('color')->default('#4285F4');
             $table->timestamps();
         });
     }
@@ -27,4 +29,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('reminders');
     }
-};
+}; 

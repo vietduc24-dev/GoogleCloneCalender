@@ -9,4 +9,4 @@ Route::get('/', function () {
 // Tất cả các route khác (SPA) đều về Vue xử lý
 Route::get('/{any}', function () {
     return view('app');
-})->where('any', '.*');
+})->where('any', '^(?!api).*$'); // Negative lookahead to exclude /api paths

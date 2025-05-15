@@ -4,7 +4,7 @@ import Register from '../pages/auth/Register.vue';
 import Calendar from '../pages/calendar/Calendar.vue';
 
 const routes = [
-  { path: '/', name: 'login', component: Login },
+  { path: '/login', name: 'login', component: Login },
   { path: '/register', name: 'register', component: Register },
   { path: '/calendar', name: 'calendar', component: Calendar },
 ];

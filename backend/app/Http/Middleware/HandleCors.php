@@ -9,30 +9,16 @@ class HandleCors
 {
     public function handle(Request $request, Closure $next)
     {
-        $origin = $request->header('Origin');
-        $allowedOrigins = ['http://localhost:8000', 'http://127.0.0.1:8000'];
+        $response = $next($request);
 
-        // If origin is not allowed, proceed without CORS headers
-        if (!in_array($origin, $allowedOrigins)) {
-            return $next($request);
-        }
-
-        if ($request->isMethod('OPTIONS')) {
-            $response = response('', 200);
-        } else {
-            $response = $next($request);
-        }
-
-        // Set CORS headers
-        $response->headers->set('Access-Control-Allow-Origin', $origin);
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:5173');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-CSRF-TOKEN');
         $response->headers->set('Access-Control-Allow-Credentials', 'true');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, X-Token-Auth, Authorization, X-XSRF-TOKEN, Accept');
-        $response->headers->set('Access-Control-Expose-Headers', 'X-XSRF-TOKEN');
-        $response->headers->set('Access-Control-Max-Age', '86400');
-        
-        // Ensure Vary header is set
-        $response->headers->set('Vary', 'Origin');
+
+        if ($request->getMethod() === 'OPTIONS') {
+            $response->setStatusCode(200);
+        }
 
         return $response;
     }

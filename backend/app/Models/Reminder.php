@@ -10,17 +10,19 @@ class Reminder extends Model
     use HasFactory;
 
     protected $fillable = [
-        'event_id',
+        'user_id',
+        'title',
         'reminder_time',
         'method',
+        'color',
     ];
 
     protected $casts = [
         'reminder_time' => 'datetime',
     ];
 
-    public function event()
+    public function user()
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(User::class);
     }
 }

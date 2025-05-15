@@ -12,13 +12,60 @@ use Illuminate\Support\Facades\Log;
 class CalendarController extends Controller
 {
     /**
+     * Get all calendars for the authenticated user.
+     */
+    public function index(Request $request)
+    {
+        try {
+            $user = $request->user();
+            
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+            
+            $calendars = Calendar::where('user_id', $user->id)->get();
+            
+            if ($calendars->isEmpty()) {
+                $defaultCalendar = Calendar::create([
+                    'user_id' => $user->id,
+                    'name' => 'Lịch của tôi',
+                    'color' => '#4285F4',
+                    'description' => 'Lịch mặc định'
+                ]);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'data' => [$defaultCalendar]
+                ]);
+            }
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => $calendars
+            ]);
+
+        } catch (Exception $e) {
+            Log::error('Failed to fetch calendars:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch calendars',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Store a newly created calendar in storage.
      */
     public function store(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'calendar_name' => 'required|string|max:255',
+                'name' => 'required|string|max:255',
                 'color' => 'nullable|string|max:7',
                 'description' => 'nullable|string',
             ]);
@@ -27,22 +74,17 @@ class CalendarController extends Controller
                 return response()->json(['errors' => $validator->errors()], 422);
             }
 
-            // Log the request data for debugging
-            Log::info('Calendar creation request:', [
-                'user_id' => $request->user()->id,
-                'name' => $request->calendar_name,
-                'color' => $request->color,
-                'description' => $request->description,
-            ]);
-
             $calendar = Calendar::create([
                 'user_id' => $request->user()->id,
-                'name' => $request->calendar_name,
-                'color' => $request->color ?? '#3490dc',
+                'name' => $request->name,
+                'color' => $request->color ?? '#4285F4',
                 'description' => $request->description,
             ]);
 
-            return response()->json($calendar, 201);
+            return response()->json([
+                'status' => 'success',
+                'data' => $calendar
+            ], 201);
 
         } catch (Exception $e) {
             Log::error('Calendar creation failed:', [
@@ -51,9 +93,9 @@ class CalendarController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Failed to create calendar',
-                'error' => $e->getMessage(),
-                'debug_info' => config('app.debug') ? $e->getTraceAsString() : null
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -64,13 +106,12 @@ class CalendarController extends Controller
     public function update(Request $request, Calendar $calendar)
     {
         try {
-            // Check if the user owns this calendar
             if ($calendar->user_id !== $request->user()->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
             $validator = Validator::make($request->all(), [
-                'calendar_name' => 'sometimes|required|string|max:255',
+                'name' => 'sometimes|required|string|max:255',
                 'color' => 'nullable|string|max:7',
                 'description' => 'nullable|string',
             ]);
@@ -80,12 +121,15 @@ class CalendarController extends Controller
             }
 
             $calendar->update([
-                'name' => $request->calendar_name ?? $calendar->name,
+                'name' => $request->name ?? $calendar->name,
                 'color' => $request->color ?? $calendar->color,
                 'description' => $request->description ?? $calendar->description,
             ]);
 
-            return response()->json($calendar);
+            return response()->json([
+                'status' => 'success',
+                'data' => $calendar
+            ]);
 
         } catch (Exception $e) {
             Log::error('Calendar update failed:', [
@@ -94,9 +138,9 @@ class CalendarController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Failed to update calendar',
-                'error' => $e->getMessage(),
-                'debug_info' => config('app.debug') ? $e->getTraceAsString() : null
+                'error' => $e->getMessage()
             ], 500);
         }
     }
@@ -107,14 +151,16 @@ class CalendarController extends Controller
     public function destroy(Calendar $calendar, Request $request)
     {
         try {
-            // Check if the user owns this calendar
             if ($calendar->user_id !== $request->user()->id) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
             $calendar->delete();
 
-            return response()->json(['message' => 'Calendar deleted successfully']);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Calendar deleted successfully'
+            ]);
 
         } catch (Exception $e) {
             Log::error('Calendar deletion failed:', [
@@ -123,9 +169,9 @@ class CalendarController extends Controller
             ]);
 
             return response()->json([
+                'status' => 'error',
                 'message' => 'Failed to delete calendar',
-                'error' => $e->getMessage(),
-                'debug_info' => config('app.debug') ? $e->getTraceAsString() : null
+                'error' => $e->getMessage()
             ], 500);
         }
     }
