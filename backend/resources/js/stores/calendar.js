@@ -1,10 +1,5 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
-
-// Sử dụng cùng cấu hình axios từ auth store
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.defaults.headers.common['Accept'] = 'application/json';
+import { api } from '../utils/axios';
 
 export const useCalendarStore = defineStore('calendar', {
     state: () => ({
@@ -15,7 +10,7 @@ export const useCalendarStore = defineStore('calendar', {
     }),
 
     getters: {
-        getCalendars: (state) => state.calendars,
+        getCalendars: (state) => state.calendars || [],
         getSelectedCalendar: (state) => state.selectedCalendar,
         isLoading: (state) => state.loading,
         getError: (state) => state.error
@@ -25,11 +20,15 @@ export const useCalendarStore = defineStore('calendar', {
         async fetchCalendars() {
             this.loading = true;
             try {
-                const response = await axios.get('/api/calendars');
-                this.calendars = response.data;
-                return response.data;
+                const response = await api.get('/calendars');
+                if (response.data.status === 'success') {
+                    this.calendars = response.data.data;
+                    return this.calendars;
+                }
+                throw new Error(response.data.message || 'Không thể tải danh sách lịch');
             } catch (error) {
                 this.error = error.response?.data?.message || 'Không thể tải danh sách lịch';
+                this.calendars = [];
                 throw error;
             } finally {
                 this.loading = false;
@@ -39,13 +38,18 @@ export const useCalendarStore = defineStore('calendar', {
         async createCalendar(calendarData) {
             this.loading = true;
             try {
-                const response = await axios.post('/api/calendars', {
-                    calendar_name: calendarData.name,
+                const response = await api.post('/calendars', {
+                    name: calendarData.name,
                     color: calendarData.color,
                     description: calendarData.description
                 });
-                this.calendars.push(response.data);
-                return response.data;
+                
+                if (response.data.status === 'success') {
+                    const newCalendar = response.data.data;
+                    this.calendars.push(newCalendar);
+                    return newCalendar;
+                }
+                throw new Error(response.data.message || 'Không thể tạo lịch');
             } catch (error) {
                 this.error = error.response?.data?.message || 'Không thể tạo lịch';
                 throw error;
@@ -57,16 +61,21 @@ export const useCalendarStore = defineStore('calendar', {
         async updateCalendar(calendarId, calendarData) {
             this.loading = true;
             try {
-                const response = await axios.put(`/api/calendars/${calendarId}`, {
-                    calendar_name: calendarData.name,
+                const response = await api.put(`/calendars/${calendarId}`, {
+                    name: calendarData.name,
                     color: calendarData.color,
                     description: calendarData.description
                 });
-                const index = this.calendars.findIndex(c => c.id === calendarId);
-                if (index !== -1) {
-                    this.calendars[index] = response.data;
+
+                if (response.data.status === 'success') {
+                    const updatedCalendar = response.data.data;
+                    const index = this.calendars.findIndex(c => c.id === calendarId);
+                    if (index !== -1) {
+                        this.calendars[index] = updatedCalendar;
+                    }
+                    return updatedCalendar;
                 }
-                return response.data;
+                throw new Error(response.data.message || 'Không thể cập nhật lịch');
             } catch (error) {
                 this.error = error.response?.data?.message || 'Không thể cập nhật lịch';
                 throw error;
@@ -78,11 +87,15 @@ export const useCalendarStore = defineStore('calendar', {
         async deleteCalendar(calendarId) {
             this.loading = true;
             try {
-                await axios.delete(`/api/calendars/${calendarId}`);
-                this.calendars = this.calendars.filter(c => c.id !== calendarId);
-                if (this.selectedCalendar?.id === calendarId) {
-                    this.selectedCalendar = null;
+                const response = await api.delete(`/calendars/${calendarId}`);
+                if (response.data.status === 'success') {
+                    this.calendars = this.calendars.filter(c => c.id !== calendarId);
+                    if (this.selectedCalendar?.id === calendarId) {
+                        this.selectedCalendar = null;
+                    }
+                    return true;
                 }
+                throw new Error(response.data.message || 'Không thể xóa lịch');
             } catch (error) {
                 this.error = error.response?.data?.message || 'Không thể xóa lịch';
                 throw error;

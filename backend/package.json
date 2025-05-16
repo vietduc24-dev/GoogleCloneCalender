@@ -15,6 +15,12 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
+        "@fullcalendar/core": "^6.1.17",
+        "@fullcalendar/daygrid": "^6.1.17",
+        "@fullcalendar/interaction": "^6.1.17",
+        "@fullcalendar/list": "^6.1.17",
+        "@fullcalendar/timegrid": "^6.1.17",
+        "@fullcalendar/vue3": "^6.1.17",
         "@types/date-fns": "^2.5.3",
         "@vitejs/plugin-vue": "^5.2.4",
         "@vueuse/core": "^13.1.0",

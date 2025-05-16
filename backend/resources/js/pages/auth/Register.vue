@@ -1,137 +1,165 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    <div class="max-w-md w-full">
+      <!-- Logo and Title -->
+      <div class="text-center">
+        <img src="https://www.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_31_2x.png" alt="Calendar Logo" class="h-12 mx-auto mb-4"/>
+        <h2 class="text-2xl font-semibold text-gray-800 mb-8">
           Đăng ký tài khoản mới
         </h2>
       </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleRegister">
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label for="name" class="sr-only">Họ và tên</label>
+
+      <!-- Registration Form -->
+      <div class="bg-white p-8 rounded-lg shadow-lg">
+        <form class="space-y-6" @submit.prevent="handleRegister">
+          <!-- Name Field -->
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-400">person</span>
+            </div>
             <input
               v-model="name"
               id="name"
               name="name"
               type="text"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
               placeholder="Họ và tên"
             />
           </div>
-          <div>
-            <label for="email" class="sr-only">Email</label>
+
+          <!-- Email Field -->
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-400">mail</span>
+            </div>
             <input
               v-model="email"
               id="email"
               name="email"
               type="email"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
               placeholder="Email"
             />
           </div>
-          <div>
-            <label for="password" class="sr-only">Mật khẩu</label>
+
+          <!-- Password Field -->
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-400">lock</span>
+            </div>
             <input
               v-model="password"
               id="password"
               name="password"
               type="password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
               placeholder="Mật khẩu"
             />
+            <p class="mt-2 text-xs text-gray-500 flex items-center">
+              <span class="material-symbols-outlined text-gray-400 mr-1" style="font-size: 14px;">info</span>
+              Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt
+            </p>
           </div>
-          <div>
-            <label for="password_confirmation" class="sr-only">Xác nhận mật khẩu</label>
+
+          <!-- Password Confirmation Field -->
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="material-symbols-outlined text-gray-400">key</span>
+            </div>
             <input
               v-model="passwordConfirmation"
               id="password_confirmation"
               name="password_confirmation"
               type="password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
               placeholder="Xác nhận mật khẩu"
             />
           </div>
-        </div>
 
-        <div v-if="errorMessage" class="text-red-600 text-center text-sm">
-          {{ errorMessage }}
-        </div>
+          <!-- Error Message -->
+          <div v-if="authStore.error" class="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-center">
+            <span class="material-symbols-outlined mr-2">error</span>
+            {{ authStore.error }}
+          </div>
 
-        <div v-if="successMessage" class="text-green-600 text-center text-sm">
-          {{ successMessage }}
-        </div>
-
-        <div>
+          <!-- Submit Button -->
           <button
             type="submit"
-            :disabled="loading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            :disabled="authStore.loading"
+            class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 flex items-center justify-center space-x-2"
           >
-            <span v-if="loading">Đang đăng ký...</span>
-            <span v-else>Đăng ký</span>
+            <span class="material-symbols-outlined" v-if="!authStore.loading">person_add</span>
+            <span v-if="authStore.loading" class="material-symbols-outlined animate-spin">progress_activity</span>
+            <span>{{ authStore.loading ? 'Đang đăng ký...' : 'Đăng ký' }}</span>
           </button>
-        </div>
-      </form>
+        </form>
 
-      <p class="mt-4 text-center text-sm text-gray-600">
-        Đã có tài khoản?
-        <a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500">Đăng nhập</a>
-      </p>
+        <!-- Login Link -->
+        <p class="mt-6 text-center text-sm text-gray-600">
+          Đã có tài khoản?
+          <router-link to="/login" class="font-medium text-blue-600 hover:text-blue-500">
+            Đăng nhập ngay
+          </router-link>
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 const name = ref('');
 const email = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
 
-const loading = ref(false);
-const errorMessage = ref('');
-const successMessage = ref('');
-
-// Giả lập API đăng ký (thay bằng API thật của bạn)
-const fakeRegisterApi = (data) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (data.password !== data.password_confirmation) {
-        reject({ message: 'Mật khẩu xác nhận không khớp' });
-      } else if (!data.email.includes('@')) {
-        reject({ message: 'Email không hợp lệ' });
-      } else {
-        resolve({ message: 'Đăng ký thành công!' });
-      }
-    }, 1500);
-  });
-};
-
 const handleRegister = async () => {
-  errorMessage.value = '';
-  successMessage.value = '';
-  loading.value = true;
-
   try {
-    const res = await fakeRegisterApi({
+    await authStore.register({
       name: name.value,
       email: email.value,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
     });
-    successMessage.value = res.message;
-    // Bạn có thể chuyển hướng sang trang login hoặc dashboard ở đây
-    // window.location.href = '/login';
+
+    // Nếu đăng ký thành công, chuyển hướng đến trang login
+    router.push('/login');
   } catch (error) {
-    errorMessage.value = error.message || 'Có lỗi xảy ra khi đăng ký';
-  } finally {
-    loading.value = false;
+    // Lỗi đã được xử lý trong auth store
+    console.error('Registration error:', error);
   }
 };
 </script>
+
+<style scoped>
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>

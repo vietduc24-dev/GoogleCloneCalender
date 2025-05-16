@@ -1,45 +1,70 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-white max-w-sm w-full p-8 rounded-lg shadow">
-      <h2 class="text-center text-2xl font-semibold mb-8">Login</h2>
-      <form @submit.prevent="handleLogin" class="space-y-4">
-        <div>
+    <div class="bg-white max-w-md w-full p-8 rounded-lg shadow-lg">
+      <!-- Logo and Title -->
+      <div class="text-center mb-8">
+        <img src="https://www.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_31_2x.png" alt="Calendar Logo" class="h-12 mx-auto mb-4"/>
+        <h2 class="text-2xl font-semibold text-gray-800">Đăng nhập vào Calendar</h2>
+      </div>
+
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <!-- Email Field -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="material-symbols-outlined text-gray-400">mail</span>
+          </div>
           <input
             v-model="email"
             id="email"
             name="email"
             type="email"
             required
-            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-400 text-base"
-            placeholder="Enter your email"
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-base"
+            placeholder="Nhập email của bạn"
           />
         </div>
-        <div>
+
+        <!-- Password Field -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span class="material-symbols-outlined text-gray-400">lock</span>
+          </div>
           <input
             v-model="password"
             id="password"
             name="password"
             type="password"
             required
-            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-gray-400 text-base"
-            placeholder="Enter your password"
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 text-base"
+            placeholder="Nhập mật khẩu"
           />
         </div>
-        <div v-if="authStore.error" class="text-red-600 text-sm text-center">
+
+        <!-- Error Message -->
+        <div v-if="authStore.error" class="bg-red-50 text-red-600 text-sm p-3 rounded-lg flex items-center">
+          <span class="material-symbols-outlined mr-2">error</span>
           {{ authStore.error }}
         </div>
+
+        <!-- Submit Button -->
         <button
           type="submit"
           :disabled="authStore.loading"
-          class="w-full py-3 mt-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition disabled:opacity-50"
+          class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-200 flex items-center justify-center space-x-2"
         >
-          <span v-if="authStore.loading">Signing in...</span>
-          <span v-else>Sign In</span>
+          <span class="material-symbols-outlined" v-if="!authStore.loading">login</span>
+          <span v-if="authStore.loading" class="material-symbols-outlined animate-spin">progress_activity</span>
+          <span>{{ authStore.loading ? 'Đang đăng nhập...' : 'Đăng nhập' }}</span>
         </button>
       </form>
-      <div class="mt-6 text-center">
-        <a href="/register" class="text-blue-500 text-sm hover:underline">Create your account?</a>
-      </div>
+
+      <!-- Register Link -->
+      <p class="mt-6 text-center text-sm text-gray-600">
+        Chưa có tài khoản?
+        <router-link to="/register" class="font-medium text-blue-600 hover:text-blue-500">
+          Đăng ký ngay
+        </router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -63,3 +88,26 @@ const handleLogin = async () => {
   }
 };
 </script>
+
+<style scoped>
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+</style>
