@@ -12,7 +12,7 @@
 
 ---
 
-## ⚙️ Backend Setup
+## ⚙️ Backend Setupß
 --laravel/sanctum 
 --cd backend
 1. Run `npm install`
