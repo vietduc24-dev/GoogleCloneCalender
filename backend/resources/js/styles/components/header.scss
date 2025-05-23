@@ -1,0 +1,32 @@
+// Header Icons
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 0,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24;
+}
+
+.header-icon {
+  font-size: 1.4rem;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+}
+
+// Responsive styles
+@media (min-width: 1024px) {
+  .header-icon {
+    font-size: 1.6rem;
+  }
+  
+  .nav-icon {
+    font-size: 1.4rem;
+  }
+}
+
+// Animations
+.rotate-180 {
+  transform: rotate(180deg);
+} 

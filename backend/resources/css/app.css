@@ -16,3 +16,42 @@
 body {
   font-family: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
+
+@layer base {
+  html {
+    font-size: 62.5%; /* 10px */
+  }
+
+  body {
+    font-size: 1.6rem; /* 16px */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Responsive font-size */
+  @media screen and (max-width: 768px) {
+    html {
+      font-size: 60%;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    html {
+      font-size: 58%;
+    }
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-content {
+    font-size: 1.6rem;
+    line-height: 1.6;
+  }
+
+  .text-heading {
+    font-size: 2.4rem;
+    line-height: 1.2;
+  }
+}

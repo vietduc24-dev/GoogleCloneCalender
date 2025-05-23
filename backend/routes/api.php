@@ -14,8 +14,8 @@ Route::get('/test', function() {
 });
 
 // Public routes
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/login', [AuthController::class, 'login'])->name('api.login');
+Route::post('/register', [AuthController::class, 'register'])->name('api.register');
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -24,13 +24,13 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-        // Calendar routes
-        Route::prefix('calendars')->group(function () {
-            Route::get('/', [CalendarController::class, 'index']);
-            Route::post('/', [CalendarController::class, 'store']);
-            Route::put('/{calendar}', [CalendarController::class, 'update']);
-            Route::delete('/{calendar}', [CalendarController::class, 'destroy']);
-        });
+    // Calendar routes
+    Route::prefix('calendars')->group(function () {
+        Route::get('/', [CalendarController::class, 'index']);
+        Route::post('/', [CalendarController::class, 'store']);
+        Route::put('/{calendar}', [CalendarController::class, 'update']);
+        Route::delete('/{calendar}', [CalendarController::class, 'destroy']);
+    });
 
     // Event routes
     Route::prefix('events')->group(function () {
@@ -51,5 +51,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Fallback for unauthenticated requests
 Route::middleware('api')->get('/unauthorized', function () {
-    return response()->json(['message' => 'Unauthenticated. Please login first.'], 401);
-})->name('login'); 
+    return response()->json([
+        'status' => 'error',
+        'message' => 'Unauthenticated. Please login first.'
+    ], 401);
+})->name('api.unauthorized'); 

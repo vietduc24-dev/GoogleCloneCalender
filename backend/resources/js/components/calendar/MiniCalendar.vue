@@ -1,16 +1,16 @@
 <template>
-  <div class="mini-calendar bg-white rounded-lg p-4">
+  <div class="mini-calendar bg-white rounded-lg p-4 w-full">
     <div class="flex items-center justify-between mb-4">
       <button 
         @click="prevMonth" 
-        class="text-gray-600 hover:text-gray-800"
+        class="text-gray-600 hover:text-gray-800 p-1"
       >
         <span class="material-symbols-outlined">chevron_left</span>
       </button>
-      <h3 class="text-sm font-medium text-gray-700">{{ currentMonthYear }}</h3>
+      <h3 class="text-sm font-medium text-gray-700 min-w-[120px] text-center">{{ currentMonthYear }}</h3>
       <button 
         @click="nextMonth" 
-        class="text-gray-600 hover:text-gray-800"
+        class="text-gray-600 hover:text-gray-800 p-1"
       >
         <span class="material-symbols-outlined">chevron_right</span>
       </button>
@@ -38,10 +38,12 @@
           v-if="isCurrentMonth"
           @click="selectDate(date)"
           :class="[
-            'w-full h-full rounded-full text-sm leading-none flex items-center justify-center transition-colors',
+            'w-full h-full rounded-full text-sm leading-none flex items-center justify-center transition-colors min-w-[2.4rem] min-h-[2.4rem]',
             isToday 
               ? 'bg-blue-600 text-white hover:bg-blue-700' 
-              : 'text-gray-700 hover:bg-gray-100'
+              : selectedDate && date.toDateString() === selectedDate.toDateString()
+                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                : 'text-gray-700 hover:bg-gray-100'
           ]"
         >
           {{ date.getDate() }}
@@ -62,8 +64,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['dateSelect']);
-
 const currentDate = ref(new Date());
+const selectedDate = ref(null);
 const weekDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
 const currentMonthYear = computed(() => {
@@ -117,6 +119,7 @@ const nextMonth = () => {
 };
 
 const selectDate = (date) => {
+  selectedDate.value = date;
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);
   
@@ -126,28 +129,21 @@ const selectDate = (date) => {
   props.onSelect({ start, end });
 };
 
+const handleSelect = (selectInfo) => {
+  selectedDate.value = selectInfo.start;
+  props.onSelect(selectInfo);
+};
+
+const handleUnselect = () => {
+  selectedDate.value = null;
+};
+
+const handleDayCellMount = (arg) => {
+  // Thêm xử lý nếu cần
+};
+
 onMounted(() => {
   // Initialize with current date
   currentDate.value = new Date();
 });
-</script>
-
-<style scoped>
-.mini-calendar {
-  min-width: 250px;
-}
-
-.aspect-square {
-  aspect-ratio: 1;
-}
-
-/* Material Icons */
-.material-symbols-outlined {
-  font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24;
-  font-size: 20px;
-}
-</style> 
+</script> 

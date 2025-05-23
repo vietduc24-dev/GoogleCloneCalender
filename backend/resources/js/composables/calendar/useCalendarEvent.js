@@ -118,7 +118,7 @@ export function useCalendarEvent(calendarApi) {
       calendarApi.unselect();
     } catch (error) {
       console.error('Error handling date select:', error);
-      alert('Có lỗi xảy ra khi tạo sự kiện');
+    
     }
   };
 
@@ -198,7 +198,7 @@ export function useCalendarEvent(calendarApi) {
     } catch (error) {
       console.error('Error updating event:', error);
       dropInfo.revert();
-      alert('Có lỗi xảy ra khi cập nhật ' + (type === 'reminder' ? 'lời nhắc' : 'sự kiện'));
+
     }
   };
 
@@ -219,7 +219,7 @@ export function useCalendarEvent(calendarApi) {
     } catch (error) {
       console.error('Error updating event:', error);
       resizeInfo.revert();
-      alert('Có lỗi xảy ra khi cập nhật sự kiện');
+  
     }
   };
 
@@ -295,7 +295,7 @@ export function useCalendarEvent(calendarApi) {
         errorMessage = error.message;
       }
       
-      alert(errorMessage);
+    
     }
   };
 
@@ -359,7 +359,7 @@ export function useCalendarEvent(calendarApi) {
       closeEventModal();
     } catch (error) {
       console.error('Error deleting:', error);
-      alert('Có lỗi xảy ra khi xóa ' + (type === 'event' ? 'sự kiện' : 'lời nhắc'));
+     
     }
   };
 

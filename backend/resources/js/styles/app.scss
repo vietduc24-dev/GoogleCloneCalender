@@ -1,0 +1,107 @@
+
+
+/* Import component styles */
+@import './components/header.scss';
+@import './components/modal.scss';
+@import './components/mini-calendar.scss';
+@import './components/register.scss';
+@import './components/login.scss';
+@import './components/maincalendar.scss';
+@layer base {
+  html {
+    font-size: 62.5%; /* 10px */
+  }
+
+  body {
+    font-size: 1.6rem; /* 16px */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Responsive font-size */
+  @media screen and (max-width: 768px) {
+    html {
+      font-size: 60%;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    html {
+      font-size: 58%;
+    }
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-content {
+    font-size: 1.6rem;
+    line-height: 1.6;
+  }
+
+  .text-heading {
+    font-size: 2.4rem;
+    line-height: 1.2;
+  }
+}
+
+// Reset box-sizing
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// Utility functions for REM conversion
+@function rem($pixels) {
+  @return ($pixels / 10) * 1rem;
+}
+
+// Common spacing variables using REM
+$spacing: (
+  'xs': rem(4),
+  'sm': rem(8),
+  'md': rem(16),
+  'lg': rem(24),
+  'xl': rem(32),
+  '2xl': rem(48),
+  '3xl': rem(64)
+);
+
+// Example usage of spacing in utility classes
+.margin {
+  @each $key, $value in $spacing {
+    &-#{$key} {
+      margin: $value;
+    }
+    
+    &-x-#{$key} {
+      margin-left: $value;
+      margin-right: $value;
+    }
+    
+    &-y-#{$key} {
+      margin-top: $value;
+      margin-bottom: $value;
+    }
+  }
+}
+
+.padding {
+  @each $key, $value in $spacing {
+    &-#{$key} {
+      padding: $value;
+    }
+    
+    &-x-#{$key} {
+      padding-left: $value;
+      padding-right: $value;
+    }
+    
+    &-y-#{$key} {
+      padding-top: $value;
+      padding-bottom: $value;
+    }
+  }
+}
